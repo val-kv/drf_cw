@@ -1,0 +1,20 @@
+<h1>Мои привычки</h1>
+<ul>
+  {% for habit in habits %}
+    <li>{{ habit.name }}</li>
+  {% endfor %}
+</ul>
+
+<div>
+  <a href="{% url 'habit-create' %}">Создать привычку</a>
+</div>
+
+<div>
+  {% if habits.has_previous %}
+    <a href="?page={{ habits.previous_page_number }}">Предыдущая страница</a>
+  {% endif %}
+
+  {% if habits.has_next %}
+    <a href="?page={{ habits.next_page_number }}">Следующая страница</a>
+  {% endif %}
+</div>
