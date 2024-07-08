@@ -1,12 +1,13 @@
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import HttpResponseRedirect
-from django.shortcuts import render
 from django.urls import reverse
 from django.views import generic
+from rest_framework import viewsets, request
+from rest_framework.exceptions import PermissionDenied
 
 from .forms import HabitForm
 from .models import Habit
+from .serializers import HabitSerializer
+from rest_framework.permissions import IsAuthenticated
 
 
 class HabitCreateView(LoginRequiredMixin, generic.CreateView):
@@ -14,52 +15,63 @@ class HabitCreateView(LoginRequiredMixin, generic.CreateView):
     model = Habit
 
     def form_valid(self, form):
-        form.instance.creator = self.request.user
+        form.instance.owner = self.request.user
         return super().form_valid(form)
 
     def get_success_url(self):
-        return reverse('habit-list')
+        return reverse('habit-detail', kwargs={'pk': self.object.pk})
 
 
 class HabitUpdateView(LoginRequiredMixin, generic.UpdateView):
     form_class = HabitForm
     model = Habit
 
+    def get_queryset(self):
+        return Habit.objects.filter(owner=self.request.user)
+
+    def form_valid(self, form):
+        form.instance.owner = self.request.user
+        return super().form_valid(form)
+
     def get_success_url(self):
-        return reverse('habit-list')
+        return reverse('habit-detail', kwargs={'pk': self.object.pk})
 
 
 class HabitDeleteView(LoginRequiredMixin, generic.DeleteView):
     model = Habit
 
+    def get_queryset(self):
+        return Habit.objects.filter(owner=self.request.user)
+
     def get_success_url(self):
         return reverse('habit-list')
 
 
-@login_required
-def habit_list(request):
-    habits = Habit.objects.filter(creator=request.user)
-    return render(request, 'habits/habit_list.html', {'habits': habits})
+class HabitListView(LoginRequiredMixin, generic.ListView):
+    model = Habit
+
+    def get_queryset(self):
+        return Habit.objects.filter(owner=self.request.user)
 
 
-def public_habit_list(request):
-    habits = Habit.objects.filter(public=True)
-    return render(request, 'habits/public_habit_list.html', {'habits': habits})
+class HabitDetailView(LoginRequiredMixin, generic.DetailView):
+    model = Habit
+
+    def get_queryset(self):
+        return Habit.objects.filter(owner=self.request.user)
 
 
-def register(request):
-    if request.method == 'POST':
-        # Handle registration logic
-        return HttpResponseRedirect('/')
-    else:
-        # Render registration form
-        return render(request, 'habits/register.html')
+class PublicHabitViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Habit.objects.all()
+    serializer_class = HabitSerializer
 
 
-def login(request):
-    if request.method == 'POST':
-        # Handle login logic
-        return HttpResponseRedirect('/')
-    else:
-        # Render login form
-        return render(request, 'habits/login.html')
+class HabitViewSet(viewsets.ModelViewSet):
+    queryset = Habit.objects.all()
+    serializer_class = HabitSerializer
+    permission_classes = [IsAuthenticated]
+
+    def send_telegram_message(self, request, *args, **kwargs):
+        # Проверяем, что пользователь авторизован
+        if not request.user.is_authenticated:
+            raise PermissionDenied("Пользователь не авторизован")

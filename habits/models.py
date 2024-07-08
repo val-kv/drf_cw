@@ -14,6 +14,8 @@ class Habit(models.Model):
     reward = models.CharField(max_length=100)
     time_required = models.DurationField()
     public = models.BooleanField(default=False)
+    linked_habit = models.ForeignKey('self', on_delete=models.CASCADE, null=True, related_name='linked_habits')
+    execution_time = models.DateTimeField(null=True, blank=True)
 
     def get_absolute_url(self):
         return reverse('habit-detail', kwargs={'pk': self.pk})

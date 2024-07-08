@@ -2,7 +2,43 @@ from drf_yasg.inspectors import SwaggerAutoSchema
 
 
 class CustomAutoSchema(SwaggerAutoSchema):
-    def get_link(self, path, method, base_url, components, request):
-        if path == '/custom/endpoint/':
-            return None
-        return super().get_link(path, method, base_url, components, request)
+    def get_operation(self, path, method):
+        # Получаем информацию о методе и пути запроса
+        operation = super().get_operation(path, method)
+
+        # Проверяем, что пользователь авторизован
+        if not getattr(operation, 'permissions', {}).get('get', {}).get('is_authenticated', True):
+            operation['permissions'] = {
+                'get': {
+                    'is_authenticated': True,
+                    'is_superuser': False,
+                    'is_staff': False,
+                    'is_admin': False,
+                },
+                'post': {
+                    'is_authenticated': True,
+                    'is_superuser': False,
+                    'is_staff': False,
+                    'is_admin': False,
+                },
+                'put': {
+                    'is_authenticated': True,
+                    'is_superuser': False,
+                    'is_staff': False,
+                    'is_admin': False,
+                },
+                'patch': {
+                    'is_authenticated': True,
+                    'is_superuser': False,
+                    'is_staff': False,
+                    'is_admin': False,
+                },
+                'delete': {
+                    'is_authenticated': True,
+                    'is_superuser': False,
+                    'is_staff': False,
+                    'is_admin': False,
+                },
+            }
+
+        return operation

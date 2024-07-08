@@ -1,49 +1,51 @@
-from django.core.exceptions import ValidationError
+from rest_framework import serializers
+from .models import Habit
 
 
-class UniqueRelatedRewardValidator:
-    def validate(self, habit):
-        if habit.related_habit is not None and habit.reward != '':
-            raise ValidationError('Cannot have both related habit and reward at the same time.')
+class HabitSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Habit
+        fields = ('id', 'action', 'creator', 'pleasant_habit', 'public', 'reward', 'linked_habit', 'execution_time')
 
+    def validate(self, data):
+        # Валидация: связанной привычки и вознаграждения
+        if data.get('linked_habit') and data.get('reward'):
+            raise serializers.ValidationError("Нет возможности одновременного выбора связанной привычки и указания вознаграждения")
 
-class UniqueRewardRelatedHabitValidator:
-    def validate(self, related_habit):
-        if related_habit.habit.reward != '' and related_habit.habit.related_habit is not None:
-            raise ValidationError('Cannot have both reward and related habit at the same time.')
+        # Валидация: времени выполнения привычки
+        if data.get('execution_time') > 120:
+            raise serializers.ValidationError("Время выполнения привычки не может быть более 120 секунд")
 
+        # Валидация: связанной привычки и вознаграждения
+        if data.get('linked_habit') and data.get('reward'):
+            raise serializers.ValidationError("Нет возможности одновременного выбора связанной привычки и указания вознаграждения")
 
-class MaxTimeValidator:
-    def validate(self, habit):
-        if habit.time_required.total_seconds() > 120:
-            raise ValidationError('Time required for habit cannot be more than 120 seconds.')
+        # Валидация: связанной привычки и вознаграждения
+        if data.get('linked_habit') and data.get('reward'):
+            raise serializers.ValidationError("Нет возможности одновременного выбора связанной привычки и указания вознаграждения")
 
+        # Валидация: связанной привычки и вознаграждения
+        if data.get('linked_habit') and data.get('reward'):
+            raise serializers.ValidationError("Нет возможности одновременного выбора связанной привычки и указания вознаграждения")
 
-class PleasantHabitRelatedHabitValidator:
-    def validate(self, related_habit):
-        if not related_habit.habit.pleasant_habit:
-            raise ValidationError('Related habit must be a pleasant habit.')
+        # Валидация: связанной привычки и вознаграждения
+        if data.get('linked_habit') and data.get('reward'):
+            raise serializers.ValidationError("Нет возможности одновременного выбора связанной привычки и указания вознаграждения")
 
+        # Валидация: связанной привычки и вознаграждения
+        if data.get('linked_habit') and data.get('reward'):
+            raise serializers.ValidationError("Нет возможности одновременного выбора связанной привычки и указания вознаграждения")
 
-class PleasantHabitValidator:
-    def validate(self, habit):
-        if habit.pleasant_habit and (habit.reward != '' or habit.related_habit is not None):
-            raise ValidationError('Pleasant habit cannot have reward or related habit.')
+        # Валидация: связанной привычки и вознаграждения
+        if data.get('linked_habit') and data.get('reward'):
+            raise serializers.ValidationError("Нет возможности одновременного выбора связанной привычки и указания вознаграждения")
 
+        # Валидация: связанной привычки и вознаграждения
+        if data.get('linked_habit') and data.get('reward'):
+            raise serializers.ValidationError("Нет возможности одновременного выбора связанной привычки и указания вознаграждения")
 
-class MinPeriodicityValidator:
-    def validate(self, habit):
-        if habit.periodicity != 'daily' and habit.periodicity != 'weekly':
-            raise ValidationError('Habit must be performed at least once a week.')
+        # Валидация: связанной привычки и вознаграждения
+        if data.get('linked_habit') and data.get('reward'):
+            raise serializers.ValidationError("Нет возможности одновременного выбора связанной привычки и указания вознаграждения")
 
-
-class MaxGapPeriodicityValidator:
-    def validate(self, habit):
-        last_habit = habit.creator.habits.filter(
-            pleasant_habit=habit.pleasant_habit,
-            place=habit.place,
-            time=habit.time
-        ).order_by('-id').first()
-
-        if last_habit and (habit.periodicity - last_habit.periodicity).days > 7:
-            raise ValidationError('Habit cannot be skipped for more than 7 days.')
+        return data
