@@ -1,10 +1,11 @@
 from django.db import models
-from django.contrib.auth.models import User
+from users.models import User
 from django.urls import reverse
 
 
 class Habit(models.Model):
-    creator = models.ForeignKey(User, on_delete=models.CASCADE, related_name='habits')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='habits', default='')
+    creator = models.CharField(max_length=100)
     place = models.CharField(max_length=100)
     time = models.TimeField()
     action = models.CharField(max_length=100)

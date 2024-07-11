@@ -3,6 +3,7 @@ from django.contrib.auth.models import AbstractUser, Group, Permission
 
 
 class User(AbstractUser):
+    user = models.CharField(max_length=30, unique=True, blank=True)
     email = models.EmailField(unique=True)
     password = models.CharField(max_length=30)
     first_name = models.CharField(max_length=70)

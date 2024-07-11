@@ -1,7 +1,21 @@
-from rest_framework import generics
+from rest_framework import generics, viewsets
 from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
+
+from .models import User
 from .serializers import UserSerializer
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+
+    def perform_create(self, serializer):
+        password = serializer.validated_data.pop('password', None)
+        instance = serializer.save()
+        if password:
+            instance.set_password(password)
+            instance.save()
 
 
 class UserCreateView(generics.CreateAPIView):
@@ -17,3 +31,4 @@ class UserLoginView(generics.GenericAPIView):
         user = serializer.validated_data
         token, created = Token.objects.get_or_create(user=user)
         return Response({'token': token.key})
+    

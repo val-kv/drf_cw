@@ -185,4 +185,4 @@ SWAGGER_SETTINGS = {
     'DEFAULT_AUTO_SCHEMA_CLASS': 'habits.swagger.CustomAutoSchema',
 }
 
-settings.AUTH_USER_MODEL = 'users.User'
+AUTH_USER_MODEL = 'users.User'
