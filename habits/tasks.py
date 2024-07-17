@@ -1,8 +1,8 @@
 from celery import shared_task
-from telegram import Bot
+from telegram_bot.models import Reminder
 
 
 @shared_task
-def send_telegram_notification(chat_id, message):
-    bot = Bot(token='7403382176:AAGe4SGM1aCnGDsyG_QXR7K210o3mWwDUzs')
-    bot.send_message(chat_id=chat_id, text=message)
+def send_telegram_reminder(reminder_id):
+    reminder = Reminder.objects.get(id=reminder_id)
+    reminder.send_telegram_reminder()
