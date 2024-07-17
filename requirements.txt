@@ -7,3 +7,4 @@ tzdata==2024.1
 celery~=5.4.0
 djangorestframework==3.15.2
 python-dotenv==1.0.1
+requests==2.32.3

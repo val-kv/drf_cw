@@ -3,6 +3,7 @@ from django.urls import reverse
 from django.views import generic
 from rest_framework import viewsets, status
 from rest_framework.exceptions import PermissionDenied
+from rest_framework.generics import ListAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.response import Response
 
 from .forms import HabitForm
@@ -11,55 +12,21 @@ from .serializers import HabitSerializer
 from rest_framework.permissions import IsAuthenticated
 
 
-class HabitCreateView(LoginRequiredMixin, generic.CreateView):
-    form_class = HabitForm
-    model = Habit
-
-    def form_valid(self, form):
-        form.instance.owner = self.request.user
-        return super().form_valid(form)
-
-    def get_success_url(self):
-        return reverse('habit-detail', kwargs={'pk': self.object.pk})
-
-
-class HabitUpdateView(LoginRequiredMixin, generic.UpdateView):
-    form_class = HabitForm
-    model = Habit
+class HabitListView(ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = HabitSerializer
 
     def get_queryset(self):
-        return Habit.objects.filter(owner=self.request.user)
-
-    def form_valid(self, form):
-        form.instance.owner = self.request.user
-        return super().form_valid(form)
-
-    def get_success_url(self):
-        return reverse('habit-detail', kwargs={'pk': self.object.pk})
+        return Habit.objects.filter(creator=self.request.user)
 
 
-class HabitDeleteView(LoginRequiredMixin, generic.DeleteView):
-    model = Habit
+class HabitDetailView(RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = HabitSerializer
+    queryset = Habit.objects.all()
 
     def get_queryset(self):
-        return Habit.objects.filter(owner=self.request.user)
-
-    def get_success_url(self):
-        return reverse('habit-list')
-
-
-class HabitListView(LoginRequiredMixin, generic.ListView):
-    model = Habit
-
-    def get_queryset(self):
-        return Habit.objects.filter(owner=self.request.user)
-
-
-class HabitDetailView(LoginRequiredMixin, generic.DetailView):
-    model = Habit
-
-    def get_queryset(self):
-        return Habit.objects.filter(owner=self.request.user)
+        return self.queryset.filter(creator=self.request.user)
 
 
 class PublicHabitViewSet(viewsets.ReadOnlyModelViewSet):

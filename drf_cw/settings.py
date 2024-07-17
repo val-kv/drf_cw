@@ -182,7 +182,7 @@ CORS_ALLOW_CREDENTIALS = True
 
 
 SWAGGER_SETTINGS = {
-    'DEFAULT_AUTO_SCHEMA_CLASS': 'habits.swagger.CustomAutoSchema',
+    'DEFAULT_AUTO_SCHEMA_CLASS': 'rest_framework.schemas.AutoSchema',
 }
 
 AUTH_USER_MODEL = 'users.User'

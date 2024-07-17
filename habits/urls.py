@@ -1,11 +1,10 @@
 from django.urls import path, include
-from rest_framework import permissions, routers
+from rest_framework import permissions
 from rest_framework.routers import DefaultRouter
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 
-from .views import HabitCreateView, HabitUpdateView, HabitDeleteView, HabitListView, HabitDetailView, \
-    PublicHabitViewSet, HabitViewSet
+from .views import PublicHabitViewSet, HabitViewSet, HabitListView, HabitDetailView
 
 app_name = 'habits'
 
@@ -24,9 +23,9 @@ router.register(r'user-habits', HabitViewSet, basename='user-habits')
 router.register(r'public-habits', PublicHabitViewSet, basename='public-habits')
 
 urlpatterns = [
-    path('create/', HabitCreateView.as_view(), name='habit-create'),
-    path('<int:pk>/update/', HabitUpdateView.as_view(), name='habit-update'),
-    path('<int:pk>/delete/', HabitDeleteView.as_view(), name='habit-delete'),
+    path('create/', HabitViewSet.create, name='habit-create'),
+    path('<int:pk>/update/', HabitViewSet.update, name='habit-update'),
+    path('<int:pk>/delete/', HabitViewSet.destroy, name='habit-delete'),
     path('', HabitListView.as_view(), name='habit-list'),
     path('<int:pk>/', HabitDetailView.as_view(), name='habit-detail'),
     path('api/', include(router.urls)),

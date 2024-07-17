@@ -1,4 +1,4 @@
-from my_celery import shared_task
+from celery import shared_task
 from telegram import Bot
 
 
