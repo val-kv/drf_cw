@@ -19,7 +19,7 @@ class UserAPITests(APITestCase):
     def test_user_create_api(self):
         url = '/api/users/'
         data = {'username': 'newuser', 'password': 'newpassword'}
-        response = self.client.post(url, data, format='json')
+        response = self.client.post(url)
         self.assertEqual(response.status_code, 201)
 
     def test_user_update_api(self):

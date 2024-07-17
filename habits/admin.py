@@ -4,7 +4,7 @@ from django.contrib.auth.models import Group, User
 
 
 admin.site.unregister(Group)
-admin.site.unregister(User)
+admin.site.register(User)
 
 admin.site.site_header = 'Habit Tracker'
 admin.site.site_title = 'Habit Tracker'

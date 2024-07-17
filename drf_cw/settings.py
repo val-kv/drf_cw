@@ -150,7 +150,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 REST_FRAMEWORK = dict(DEFAULT_PERMISSION_CLASSES=[
     'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
 ], DEFAULT_AUTHENTICATION_CLASSES=(
-    'rest_framework_simplejwt.authentication.JWTAuthentication'))
+    'rest_framework_simplejwt.authentication.JWTAuthentication',))
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
@@ -167,7 +167,7 @@ CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'UTC'
 CELERY_BEAT_SCHEDULE = {
     'periodic_task_name': {
-        'task': 'your_app.tasks.periodic_task_function',
+        'task': 'habits.tasks.periodic_task_function',
         'schedule': 3600,  # каждый час
     },
 }
@@ -182,7 +182,7 @@ CORS_ALLOW_CREDENTIALS = True
 
 
 SWAGGER_SETTINGS = {
-    'DEFAULT_AUTO_SCHEMA_CLASS': 'habits.swagger.CustomAutoSchema',
+    'DEFAULT_AUTO_SCHEMA_CLASS': 'rest_framework.schemas.AutoSchema',
 }
 
-settings.AUTH_USER_MODEL = 'users.User'
+AUTH_USER_MODEL = 'users.User'
