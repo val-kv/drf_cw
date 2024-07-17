@@ -21,4 +21,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('habits.urls')),
     path('', include('users.urls')),
+    path('', include('telegram_bot.urls')),
 ]
