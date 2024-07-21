@@ -49,7 +49,6 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'telegram_bot',
     'django_celery_beat',
-    'celery',
     'corsheaders',
     'drf_yasg',
 ]
@@ -147,9 +146,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-REST_FRAMEWORK = dict(DEFAULT_PERMISSION_CLASSES=[
-    'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
-], DEFAULT_AUTHENTICATION_CLASSES=(
+REST_FRAMEWORK = dict(DEFAULT_AUTHENTICATION_CLASSES=(
     'rest_framework_simplejwt.authentication.JWTAuthentication',))
 
 SIMPLE_JWT = {
