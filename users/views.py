@@ -11,7 +11,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         password = serializer.validated_data.pop('password', None)
-        instance = serializer.save()
+        instance = serializer.save(user=self.request.user)
         if password:
             instance.set_password(password)
             instance.save()
