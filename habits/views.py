@@ -1,15 +1,18 @@
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.urls import reverse
-from django.views import generic
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, permissions
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.generics import ListAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.response import Response
 
-from .forms import HabitForm
 from .models import Habit
 from .serializers import HabitSerializer
 from rest_framework.permissions import IsAuthenticated
+
+
+class IsOwnerOrReadOnly(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        return obj.user == request.user
 
 
 class HabitListView(ListAPIView):
@@ -37,7 +40,7 @@ class PublicHabitViewSet(viewsets.ReadOnlyModelViewSet):
 class HabitViewSet(viewsets.ModelViewSet):
     queryset = Habit.objects.all()
     serializer_class = HabitSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsOwnerOrReadOnly]
 
     def get_queryset(self):
         user = self.request.user
@@ -67,3 +70,6 @@ class HabitViewSet(viewsets.ModelViewSet):
         # Проверяем, что пользователь авторизован
         if not request.user.is_authenticated:
             raise PermissionDenied("Пользователь не авторизован")
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)

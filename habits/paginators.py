@@ -1,5 +1,6 @@
 
-from rest_framework import viewsets, request
+from rest_framework import viewsets
+from rest_framework.request import Request
 from rest_framework.pagination import PageNumberPagination
 
 from .models import Habit
@@ -13,6 +14,8 @@ class CustomPagination(PageNumberPagination):
 
 
 class HabitViewSet(viewsets.ModelViewSet):
-    queryset = Habit.objects.filter(user=request.user)
+    def get_queryset(self):
+        request = Request(self.request)
+        return Habit.objects.filter(user=request.user)
     serializer_class = HabitSerializer
     pagination_class = CustomPagination
