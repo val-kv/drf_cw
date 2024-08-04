@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'django_celery_beat',
     'corsheaders',
     'drf_yasg',
+    'rest_framework_swagger',
 ]
 
 MIDDLEWARE = [
@@ -164,7 +165,7 @@ CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'UTC'
 CELERY_BEAT_SCHEDULE = {
     'periodic_task_name': {
-        'task': 'habits.tasks.periodic_task_function',
+        'task': 'habits.tasks.remind',
         'schedule': 3600,  # каждый час
     },
 }
@@ -177,9 +178,5 @@ CORS_ALLOW_METHODS = ['GET', 'POST', 'PUT', 'DELETE']
 CORS_ALLOW_HEADERS = ['Content-Type']
 CORS_ALLOW_CREDENTIALS = True
 
-
-SWAGGER_SETTINGS = {
-    'DEFAULT_AUTO_SCHEMA_CLASS': 'rest_framework.schemas.AutoSchema',
-}
 
 AUTH_USER_MODEL = 'users.User'

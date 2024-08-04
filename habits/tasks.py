@@ -1,8 +1,18 @@
-from celery import shared_task
-from telegram_bot.models import Reminder
+import telebot
+from datetime import datetime
+
+# Создание экземпляра бота
+bot = telebot.TeleBot('7403382176:AAGe4SGM1aCnGDsyG_QXR7K210o3mWwDUzs')
 
 
-@shared_task
-def send_telegram_reminder(reminder_id):
-    reminder = Reminder.objects.get(id=reminder_id)
-    reminder.send_telegram_reminder()
+# Функция для отправки напоминания
+@bot.message_handler(commands=['remind'])
+def remind(message):
+    text = message.text.split(' ', 1)[1]
+    time = datetime.strptime(text.split(' ', 1)[0], '%Y-%m-%d %H:%M')
+    reminder = text.split(' ', 1)[1]
+    bot.send_message(message.chat.id, reminder, str(datetime.timestamp(time)))
+
+
+# Запуск бота
+bot.polling()

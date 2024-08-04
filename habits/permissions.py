@@ -9,7 +9,7 @@ class HabitDetailView(UserPassesTestMixin, DetailView):
 
     def test_func(self):
         habit = self.get_object()
-        return self.request.user == habit.creator or self.request.user.has_perm('app_name.can_edit_habit')
+        return self.request.user == habit.creator or self.request.user.has_perm('habits.can_edit_habit')
 
 
 class HabitUpdateView(UserPassesTestMixin, UpdateView):
@@ -17,7 +17,7 @@ class HabitUpdateView(UserPassesTestMixin, UpdateView):
 
     def test_func(self):
         habit = self.get_object()
-        return self.request.user == habit.creator or self.request.user.has_perm('app_name.can_edit_habit')
+        return self.request.user == habit.creator or self.request.user.has_perm('habits.can_edit_habit')
 
 
 class HabitDeleteView(UserPassesTestMixin, DeleteView):
@@ -25,4 +25,4 @@ class HabitDeleteView(UserPassesTestMixin, DeleteView):
 
     def test_func(self):
         habit = self.get_object()
-        return self.request.user == habit.creator or self.request.user.has_perm('app_name.can_delete_habit')
+        return self.request.user == habit.creator or self.request.user.has_perm('habits.can_delete_habit')
