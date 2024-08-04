@@ -1,8 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import Group, User
-from django_celery_beat.models import PeriodicTask, IntervalSchedule
-from habits.tasks import send_telegram_reminder
 
 admin.site.unregister(Group)
 admin.site.register(User)
@@ -39,14 +37,3 @@ class HabitPermissionAdmin(admin.ModelAdmin):
 
 admin.site.register(Group, HabitPermissionAdmin)
 
-
-@admin.register(PeriodicTask)
-class PeriodicTaskAdmin(admin.ModelAdmin):
-    list_display = ['name', 'task', 'interval', 'start_time', 'enabled']
-
-    def save_model(self, request, obj, form, change):
-        if not obj.id:
-            interval = IntervalSchedule.objects.create(every=10, period=IntervalSchedule.SECONDS)
-            obj.interval = interval
-            obj.task = 'drf_cw.tasks.send_telegram_reminder'
-        obj.save()

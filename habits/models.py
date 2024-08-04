@@ -30,6 +30,12 @@ class Habit(models.Model):
     def get_user_habits(self, user):
         return self.objects.filter(creator=user)
 
+    def get_related_habits(self):
+        return self.related_habits.all()
+
+    def get_linked_habits(self):
+        return self.linked_habits.all()
+
     class Meta:
         permissions = (
             ('can_edit_habit', 'Can edit habit'),
