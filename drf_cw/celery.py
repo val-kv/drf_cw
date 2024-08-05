@@ -1,11 +1,14 @@
+import eventlet
 import os
 from celery import Celery
 
+eventlet.monkey_patch()
+
 # Создаем экземпляр Celery
-celery = Celery('habits')
+app = Celery('drf_cw')
 
 # Загружаем настройки из переменных среды
-celery.conf.update(
+app.conf.update(
     broker_url=os.environ.get('CELERY_BROKER_URL'),
     result_backend=os.environ.get('CELERY_RESULT_BACKEND'),
     task_serializer=os.environ.get('CELERY_TASK_SERIALIZER'),
@@ -16,4 +19,4 @@ celery.conf.update(
 )
 
 # Загружаем задачи из модулей
-celery.autodiscover_tasks()
+app.autodiscover_tasks()
