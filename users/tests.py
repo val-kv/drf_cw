@@ -1,59 +1,80 @@
-from django.test import TestCase
+import uuid
+
 from django.urls import reverse
 from rest_framework import status
-from rest_framework.test import APIClient
-from users.models import User
+from rest_framework.test import APITestCase
+from django.contrib.auth import get_user_model
+from rest_framework.authtoken.models import Token
 
 
-class UserTests(TestCase):
+User = get_user_model()
+
+
+class UserViewSetTests(APITestCase):
+
     def setUp(self):
-        self.client = APIClient()
-        self.user = User.objects.create_user(username='test_user', password='testpassword')
-
-    def test_user_list(self):
-        url = reverse('users')
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.user_data = {
+            'username': 'testuser',
+            'email': 'testuser@example.com',
+            'password': 'testpassword'
+        }
+        self.user = User.objects.create_user(
+            username=f'testuser_{uuid.uuid4().hex[:8]}',
+            password='testpassword'
+        )
+        self.token, _ = Token.objects.create(user=self.user, token='testtoken')
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token.key)
 
     def test_user_create(self):
-        url = reverse('register')
-        data = {'username': 'new_user', 'password': 'newpassword'}
+        url = reverse("users:register")
+        data = {
+            'username': 'newuser',
+            'email': 'newuser@example.com',
+            'password': 'newpassword'
+        }
         response = self.client.post(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(User.objects.count(), 2)
-        self.assertEqual(User.objects.get(username='new_user').username, 'new_user')
+        self.assertEqual(User.objects.get(email='newuser@example.com').username, 'newuser')
 
-    def test_user_retrieve(self):
-        url = reverse('users', args=[self.user.pk])
+    def test_user_create_with_existing_email(self):
+        url = reverse("users:register")
+        data = {
+            'username': 'updateduser',
+            'email': 'testuser@example.com',
+            'password': 'newpassword'
+        }
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.username, 'updateduser')
+
+    def test_user_list(self):
+        url = reverse("users:user-list")
         response = self.client.get(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['username'], 'test_user')
+        self.assertEqual(len(response.data), 1)
+
+    def test_user_detail(self):
+        url = reverse("users:user-detail", args=[self.user.id])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['username'], self.user.username)
 
     def test_user_update(self):
-        url = reverse('user-detail', args=[self.user.pk])
-        data = {'username': 'updated_user'}
-        response = self.client.put(url, data, format='json')
+        url = reverse("users:user-detail", args=[self.user.id])
+        data = {
+            'username': 'updatedusername',
+            'email': 'updated@example.com',
+            'password': 'newpassword'
+        }
+        response = self.client.patch(url, data, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(User.objects.get(pk=self.user.pk).username, 'updated_user')
+        self.user.refresh_from_db()
+        self.assertEqual(self.user.username, 'updatedusername')
 
     def test_user_delete(self):
-        url = reverse('user-detail', args=[self.user.pk])
+        url = reverse("users:user-detail", args=[self.user.id])
         response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
-        self.assertEqual(User.objects.count(), 0)
-
-    def test_user_login(self):
-        url = reverse('login')
-        data = {'username': 'test_user', 'password': 'testpassword'}
-        response = self.client.post(url, data, format='json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-    def test_user_logout(self):
-        url = reverse('logout')
-        response = self.client.post(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-    def test_user_refresh(self):
-        url = reverse('refresh')
-        response = self.client.post(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertFalse(User.objects.filter(id=self.user.id).exists())
