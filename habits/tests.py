@@ -1,71 +1,88 @@
-from django.test import TestCase
+import uuid
+
 from django.urls import reverse
-from rest_framework.test import APIClient
 from rest_framework import status
+from rest_framework.test import APITestCase
+from rest_framework.authtoken.models import Token
+from .models import User, Habit
 
-from users.models import User
-from .models import Habit
 
-
-class HabitListViewTestCase(TestCase):
+class HabitTests(APITestCase):
     def setUp(self):
-        self.client = APIClient()
-        self.user = User.objects.create_user(username='test_user', password='testpassword')
-        self.client.force_authenticate(user=self.user)
+        self.user = User.objects.create_user(
+            username=f'testuser_{uuid.uuid4().hex[:8]}',
+            password='testpassword'
+        )
+        self.token, _ = Token.objects.create(user=self.user, token='testtoken')
+        self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token.key)
 
-    def test_get_habits_list(self):
-        habit = Habit.objects.create(creator=self.user, action='Test Habit')
-        response = self.client.get(reverse('habit-list'))
+    def test_create_habit(self):
+        url = reverse("habits:habit-list")
+        data = {'name': 'Test Habit'}
+        response = self.client.post(url, data, format='json')
 
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Habit.objects.count(), 1)
+        self.assertEqual(Habit.objects.get().name, 'Test Habit')
 
-        habits = response.data
-        self.assertEqual(len(habits), 1)
-        self.assertEqual(habits[0]['action'], 'Test Habit')
-
-    def test_get_habits_list_unauthenticated(self):
-        response = self.client.get(reverse('habit-list'))
-
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-
-
-class HabitDetailViewTestCase(TestCase):
-    def setUp(self):
-        self.client = APIClient()
-        self.user = User.objects.create_user(username='testuser', password='testpassword')
-        self.client.force_authenticate(user=self.user)
-
-    def test_get_habit_detail(self):
-        habit = Habit.objects.create(creator=self.user, action='Test Habit')
-
-        response = self.client.get(reverse('habit-detail', kwargs={'pk': habit.pk}))
+    def test_get_habit(self):
+        habit = Habit.objects.create(name='Test Habit', creator=self.user)
+        url = reverse("habits:habit-detail", args=[habit.id])
+        response = self.client.get(url)
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertContains(response, habit.name)
 
-        habit_data = response.data
-        self.assertEqual(habit_data['action'], 'Test Habit')
+    def test_update_habit(self):
+        habit = Habit.objects.create(name='Test Habit', creator=self.user)
+        url = reverse("habits:habit-detail", args=[habit.id])
+        data = {'name': 'Updated Habit'}
 
-    def test_get_habit_detail_unauthenticated(self):
-
-        habit = Habit.objects.create(creator=self.user, action='Test Habit')
-
-        response = self.client.get(reverse('habit-detail', kwargs={'pk': habit.pk}))
-
-        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
-
-    def test_update_habit_detail(self):
-        habit = Habit.objects.create(creator=self.user, action='Test Habit')
-
-        data = {'action': 'Updated Habit'}
-        response = self.client.patch(reverse('habit-detail', kwargs={'pk': habit.pk}), data=data)
+        response = self.client.put(url, data, format='json')
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-
         habit.refresh_from_db()
-        self.assertEqual(habit.action, 'Updated Habit')
+        self.assertEqual(habit.name, 'Updated Habit')
 
-    def test_delete_habit_detail(self):
-        habit = Habit.objects.create(creator=self.user, action='Test Habit')
-        response = self.client.delete(reverse('habit-detail', kwargs={'pk': habit.pk}))
+    def test_partial_update_habit(self):
+        habit = Habit.objects.create(name='Test Habit', creator=self.user)
+        url = reverse("habits:habit-detail", args=[habit.id])
+        data = {'name': 'Partially Updated Habit'}
+
+        response = self.client.patch(url, data, format='json')
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        habit.refresh_from_db()
+        self.assertEqual(habit.name, 'Partially Updated Habit')
+
+    def test_delete_habit(self):
+        habit = Habit.objects.create(name='Test Habit', creator=self.user)
+        url = reverse("habits:habit-detail", args=[habit.id])
+
+        response = self.client.delete(url)
 
         self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(Habit.objects.count(), 0)
+
+    def test_public_habit_viewset(self):
+        public_habit = Habit.objects.create(name='Public Habit', creator=self.user, public=True)
+        url = reverse("habits:public-habit")
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertContains(response, public_habit.name)
+
+    def test_owner_permission(self):
+        other_user = User.objects.create_user(username='otheruser', password='otherpassword')
+        other_habit = Habit.objects.create(name='Other Habit', creator=other_user)
+
+        url = reverse("habits:habit-detail", args=[other_habit.id])
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_send_telegram_message(self):
+        url = reverse("habits:send_telegram_message")
+        response = self.client.post(url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
