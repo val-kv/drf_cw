@@ -13,7 +13,7 @@ class HabitTests(APITestCase):
             username=f'testuser_{uuid.uuid4().hex[:8]}',
             password='testpassword'
         )
-        self.token, _ = Token.objects.create(user=self.user, token='testtoken')
+        self.token = Token.objects.create(user=self.user)
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token.key)
 
     def test_create_habit(self):
@@ -36,7 +36,7 @@ class HabitTests(APITestCase):
     def test_update_habit(self):
         habit = Habit.objects.create(name='Test Habit', creator=self.user)
         url = reverse("habits:habit-detail", args=[habit.id])
-        data = {'name': 'Updated Habit'}
+        data = {'username': 'Updated Habit'}
 
         response = self.client.put(url, data, format='json')
 
