@@ -28,7 +28,7 @@ class UserCreateView(generics.CreateAPIView):
         serializer.is_valid(raise_exception=True)
         try:
             user = User.objects.create_user(
-                username=serializer.validated_data['user'],
+                username=serializer.validated_data['username'],
                 email=serializer.validated_data['email'],
                 password=serializer.validated_data['password']
             )

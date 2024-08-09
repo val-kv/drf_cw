@@ -4,7 +4,8 @@ from django.urls import reverse
 
 
 class Habit(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='habits', default='')
+    name = models.CharField(max_length=100, default='')
+    username = models.ForeignKey(User, on_delete=models.CASCADE, related_name='habits', default='')
     creator = models.CharField(max_length=100)
     place = models.CharField(max_length=100)
     time = models.TimeField()

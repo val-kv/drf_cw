@@ -22,7 +22,7 @@ class UserViewSetTests(APITestCase):
             username=f'testuser_{uuid.uuid4().hex[:8]}',
             password='testpassword'
         )
-        self.token, _ = Token.objects.create(user=self.user, token='testtoken')
+        self.token = Token.objects.create(user=self.user)
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token.key)
 
     def test_user_create(self):
