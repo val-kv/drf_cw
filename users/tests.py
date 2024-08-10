@@ -2,7 +2,8 @@ import uuid
 
 from django.urls import reverse
 from rest_framework import status
-from rest_framework.test import APITestCase
+from rest_framework.test import APIClient
+from django.test import TestCase
 from django.contrib.auth import get_user_model
 from rest_framework.authtoken.models import Token
 
@@ -10,21 +11,16 @@ from rest_framework.authtoken.models import Token
 User = get_user_model()
 
 
-class UserViewSetTests(APITestCase):
-
+class UserViewSetTests(TestCase):
     def setUp(self):
-        self.user_data = {
-            'username': 'testuser',
-            'email': 'testuser@example.com',
-            'password': 'testpassword'
-        }
+        self.client = APIClient()
         self.user = User.objects.create_user(
-            username=f'testuser_{uuid.uuid4().hex[:8]}',
-            password='testpassword'
+            username='testuser_b5406663',
+            email='testuser@example.com',
+            password='initialpassword'
         )
         self.token = Token.objects.create(user=self.user)
         self.client.credentials(HTTP_AUTHORIZATION='Token ' + self.token.key)
-
     def test_user_create(self):
         url = reverse("users:register")
         data = {
@@ -39,6 +35,7 @@ class UserViewSetTests(APITestCase):
 
     def test_user_create_with_existing_email(self):
         url = reverse("users:register")
+
         data = {
             'username': 'updateduser',
             'email': 'testuser@example.com',

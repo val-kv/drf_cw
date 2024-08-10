@@ -1,10 +1,15 @@
-from rest_framework import viewsets, status, permissions
+from rest_framework import viewsets, status, permissions, generics
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.generics import ListAPIView, RetrieveUpdateDestroyAPIView
 from rest_framework.response import Response
 from .models import Habit
 from .serializers import HabitSerializer
 from rest_framework.permissions import IsAuthenticated
+
+
+class HabitListCreateAPIView(generics.ListCreateAPIView):
+    queryset = Habit.objects.all()
+    serializer_class = HabitSerializer
 
 
 class IsOwnerOrReadOnly(permissions.BasePermission):
@@ -65,10 +70,12 @@ class HabitViewSet(viewsets.ModelViewSet):
         self.perform_update(serializer)
         return Response(serializer.data)
 
-    def send_telegram_message(self, request, *args, **kwargs):
+    def send_telegram_message(self, request):
         # Проверяем, что пользователь авторизован
         if not request.user.is_authenticated:
             raise PermissionDenied("Пользователь не авторизован")
+
+        return Response('Telegram message sent successfully.', status=status.HTTP_200_OK)
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
