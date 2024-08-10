@@ -1,6 +1,7 @@
 from django.db import models
 from users.models import User
 from django.urls import reverse
+from django.utils import timezone
 
 
 class Habit(models.Model):
@@ -14,7 +15,7 @@ class Habit(models.Model):
     related_habit = models.ForeignKey('self', on_delete=models.CASCADE, null=True, related_name='related_habits')
     periodicity = models.CharField(max_length=100, default='daily')
     reward = models.CharField(max_length=100)
-    time_required = models.DurationField()
+    time_required = models.DurationField(default=timezone.timedelta(hours=1))
     public = models.BooleanField(default=False)
     linked_habit = models.ForeignKey('self', on_delete=models.CASCADE, null=True, related_name='linked_habits')
     execution_time = models.DateTimeField(null=True, blank=True)
