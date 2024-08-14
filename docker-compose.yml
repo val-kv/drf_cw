@@ -13,17 +13,12 @@ services:
       - postgres
       - redis
     environment:
-        - DATABASE_URL=postgres://user:password@db:5432/mydatabase
-        - REDIS_HOST=redis
-        - CELERY_BROKER_URL=redis://redis:6379/0
-        - CELERY_RESULT_BACKEND=redis://redis:6379/0
+        - .env
 
   postgres:
     image: postgres
     environment:
-      - POSTGRES_USER=${DB_USER}
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
-      - POSTGRES_DB=${DB_NAME}
+      - .env
     volumes:
       - pgdata:/var/lib/postgresql/data
 
@@ -39,9 +34,8 @@ services:
     depends_on:
       - redis
     environment:
-      - CELERY_BROKER_URL=redis://redis:6379/0
-      - CELERY_RESULT_BACKEND=redis://redis:6379/0
-    command: bash -c "celery -A myproject worker --loglevel=INFO"
+      - .env
+    command: bash -c "celery -A drf_cw worker --loglevel=INFO -B"
 
 volumes:
   pgdata:
