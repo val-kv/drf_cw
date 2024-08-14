@@ -11,14 +11,19 @@
 
 Чтобы настроить окружение, вам нужно будет создать файл `.env` в папке проекта. В этом файле вы должны указать следующие переменные:
 
-* `DATABASE_URL`: URL базы данных PostgreSQL.
-* `REDIS_HOST`: адрес Redis сервера.
-* `CELERY_BROKER_URL`: URL брокера Celery.
-* `CELERY_RESULT_BACKEND`: URL бэкенда Celery.
+* `DB_NAME`: имя базы данных
+* `DB_USER`: имя пользователя БД
+* `DB_PASSWORD`: пароль БД
+* `DB_HOST`: адрес сервера БД
+* `DB_PORT`: порт  БД
+
+* `CELERY_APP`: имя приложения celery
+* `REDIS_HOST`: адрес Redis сервера
+* `CELERY_BROKER_URL`: URL брокера Celery
+* `CELERY_RESULT_BACKEND`: URL бэкенда Celery
 
 Пример файла `.env`:
 ```makefile
-DATABASE_URL=postgres://user:password@localhost:5432/mydatabase
 REDIS_HOST=localhost
 CELERY_BROKER_URL=redis://localhost:6379/0
 CELERY_RESULT_BACKEND=redis://localhost:6379/0
