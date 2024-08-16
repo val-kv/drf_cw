@@ -8,7 +8,8 @@ WORKDIR /app
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Копируем остальные файлы проекта
 COPY . .
 
 # Указываем команду для запуска сервера
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "drf_cw.wsgi:application"]
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
