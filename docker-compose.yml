@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   web:
     build:
@@ -35,12 +33,24 @@ services:
     volumes:
       - .:/app
     depends_on:
-      - web
       - postgres
       - redis
     environment:
       - .env
-    command: bash -c "celery -A drf_cw worker --loglevel=info -B"
+    command: bash -c "celery -A drf_cw worker --loglevel=info -B "
+
+  celery-beat:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/app
+    depends_on:
+      - postgres
+      - redis
+    environment:
+      - .env
+    command: bash -c "celery -A drf_cw beat --loglevel=info"
 
 volumes:
   pgdata:
